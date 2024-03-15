@@ -49,6 +49,18 @@ public class Account {
 		return checkingBalance;
 	}
 
+	//getting both Checking Balance Saving Balance
+	/*
+	public double getBothCheckSavingBalance(){
+		return ;
+	}
+
+	 */
+
+
+
+
+
 	public double getSavingBalance() {
 		return savingBalance;
 	}

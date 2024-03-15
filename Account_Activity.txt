@@ -1,0 +1,2 @@
+Mar 15, 2024 4:27:46 PM Account getCheckingWithdrawInput
+INFO: Withdrew 7000.0 from Checking account

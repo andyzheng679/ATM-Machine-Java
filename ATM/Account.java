@@ -1,6 +1,12 @@
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+import java.util.Date;
 
 public class Account {
 	// variables
@@ -8,9 +14,30 @@ public class Account {
 	private int pinNumber;
 	private double checkingBalance = 0;
 	private double savingBalance = 0;
+	private double retirementBalance = 0;
+
+	private Logger logger = Logger.getLogger("Activity Log");
+
+	Date date = new Date();
 
 	Scanner input = new Scanner(System.in);
 	DecimalFormat moneyFormat = new DecimalFormat("'$'###,##0.00");
+
+	//part 3
+
+	SimpleFormatter logFormatter = new SimpleFormatter();
+	FileHandler fh;
+
+	{
+		try {
+			fh = new FileHandler("Account_Activity.txt", true);
+			logger.addHandler(fh);
+			logger.setLevel(Level.INFO);
+			fh.setFormatter(logFormatter);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 	public Account() {
 	}
@@ -20,11 +47,12 @@ public class Account {
 		this.pinNumber = pinNumber;
 	}
 
-	public Account(int customerNumber, int pinNumber, double checkingBalance, double savingBalance) {
+	public Account(int customerNumber, int pinNumber, double checkingBalance, double savingBalance, double retirementBalance) {
 		this.customerNumber = customerNumber;
 		this.pinNumber = pinNumber;
 		this.checkingBalance = checkingBalance;
 		this.savingBalance = savingBalance;
+		this.retirementBalance = retirementBalance;
 	}
 
 	public int setCustomerNumber(int customerNumber) {
@@ -49,13 +77,10 @@ public class Account {
 		return checkingBalance;
 	}
 
-	//getting both Checking Balance Saving Balance
-	/*
-	public double getBothCheckSavingBalance(){
-		return ;
+	//getting retirement balance
+	public double getRetirementBalance(){
+		return retirementBalance;
 	}
-
-	 */
 
 
 
@@ -75,6 +100,12 @@ public class Account {
 		return savingBalance;
 	}
 
+	//
+	public double calcRetirementWithdraw(double amount) {
+		retirementBalance = (retirementBalance - amount);
+		return retirementBalance;
+	}
+
 	public double calcCheckingDeposit(double amount) {
 		checkingBalance = (checkingBalance + amount);
 		return checkingBalance;
@@ -85,15 +116,33 @@ public class Account {
 		return savingBalance;
 	}
 
+	//retirement deposit
+	public double calcRetirementDeposit(double amount) {
+		retirementBalance = (retirementBalance + amount);
+		return retirementBalance;
+	}
+
+
+
 	public void calcCheckTransfer(double amount) {
 		checkingBalance = checkingBalance - amount;
 		savingBalance = savingBalance + amount;
+		retirementBalance = retirementBalance + amount;
 	}
 
 	public void calcSavingTransfer(double amount) {
 		savingBalance = savingBalance - amount;
 		checkingBalance = checkingBalance + amount;
+		retirementBalance = retirementBalance + amount;
 	}
+
+	//tranfer funds, add the last part, if you have three accounts, you need three options
+	public void calcRetirementTransfer(double amount) {
+		retirementBalance = retirementBalance - amount;
+		savingBalance = savingBalance + amount;
+		checkingBalance = checkingBalance + amount;
+	}
+
 
 	public void getCheckingWithdrawInput() {
 		boolean end = false;
@@ -104,6 +153,7 @@ public class Account {
 				double amount = input.nextDouble();
 				if ((checkingBalance - amount) >= 0 && amount >= 0) {
 					calcCheckingWithdraw(amount);
+					logger.log(Level.INFO, "Withdrew " + amount + " from Checking account on Date: " + date);
 					System.out.println("\nCurrent Checking Account Balance: " + moneyFormat.format(checkingBalance));
 					end = true;
 				} else {
@@ -126,6 +176,27 @@ public class Account {
 				if ((savingBalance - amount) >= 0 && amount >= 0) {
 					calcSavingWithdraw(amount);
 					System.out.println("\nCurrent Savings Account Balance: " + moneyFormat.format(savingBalance));
+					end = true;
+				} else {
+					System.out.println("\nBalance Cannot Be Negative.");
+				}
+			} catch (InputMismatchException e) {
+				System.out.println("\nInvalid Choice.");
+				input.next();
+			}
+		}
+	}
+	//add on the retirement withdraw input
+	public void getRetirementWithdrawInput() {
+		boolean end = false;
+		while (!end) {
+			try {
+				System.out.println("\nCurrent Retirement Account Balance: " + moneyFormat.format(retirementBalance));
+				System.out.print("\nAmount you want to withdraw from Retirement Account: ");
+				double amount = input.nextDouble();
+				if ((retirementBalance - amount) >= 0 && amount >= 0) {
+					calcSavingWithdraw(amount);
+					System.out.println("\nCurrent Retirement Account Balance: " + moneyFormat.format(retirementBalance));
 					end = true;
 				} else {
 					System.out.println("\nBalance Cannot Be Negative.");
@@ -169,6 +240,29 @@ public class Account {
 				if ((savingBalance + amount) >= 0 && amount >= 0) {
 					calcSavingDeposit(amount);
 					System.out.println("\nCurrent Savings Account Balance: " + moneyFormat.format(savingBalance));
+					end = true;
+				} else {
+					System.out.println("\nBalance Cannot Be Negative.");
+				}
+			} catch (InputMismatchException e) {
+				System.out.println("\nInvalid Choice.");
+				input.next();
+			}
+		}
+	}
+
+	//get retirement deposit input
+	public void getRetirementDepositInput() {
+		boolean end = false;
+		while (!end) {
+			try {
+				System.out.println("\nCurrent Retirement Account Balance: " + moneyFormat.format(retirementBalance));
+				System.out.print("\nAmount you want to deposit into your Retirement Account: ");
+				double amount = input.nextDouble();
+
+				if ((retirementBalance + amount) >= 0 && amount >= 0) {
+					calcSavingDeposit(amount);
+					System.out.println("\nCurrent Retirement Account Balance: " + moneyFormat.format(retirementBalance));
 					end = true;
 				} else {
 					System.out.println("\nBalance Cannot Be Negative.");

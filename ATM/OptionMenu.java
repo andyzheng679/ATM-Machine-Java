@@ -1,14 +1,16 @@
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.InputMismatchException;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
+
 
 public class OptionMenu {
 	Scanner menuInput = new Scanner(System.in);
 	DecimalFormat moneyFormat = new DecimalFormat("'$'###,##0.00");
+
+	//change type to a list of account
 	HashMap<Integer, Account> data = new HashMap<Integer, Account>();
 
 	public void getLogin() throws IOException {
@@ -47,8 +49,11 @@ public class OptionMenu {
 				System.out.println("\nSelect the account you want to access: ");
 				System.out.println(" Type 1 - Checking Account");
 				System.out.println(" Type 2 - Savings Account");
-				System.out.println(" Type 3 - Get Balance for Checking & Savings Account");
-				System.out.println(" Type 4 - Exit");
+				//give option for retirement account
+				System.out.println(" Type 3 - Retirement Account");
+				//give new option
+				System.out.println(" Type 4 - Get Balance for Checking & Savings Account");
+				System.out.println(" Type 5 - Exit");
 				System.out.print("\nChoice: ");
 
 				int selection = menuInput.nextInt();
@@ -61,10 +66,13 @@ public class OptionMenu {
 					getSaving(acc);
 					break;
 				case 3:
-					System.out.println("Checking Balance: " + acc.getCheckingBalance());
-					System.out.println("Checking Balance: " + acc.getSavingBalance());
-					break;
+					getRetirement(acc);
 				case 4:
+					//get both balances and print them out
+					System.out.println("Checking Balance: " + acc.getCheckingBalance());
+					System.out.println("Saving Balance: " + acc.getSavingBalance());
+					break;
+				case 5:
 					end = true;
 					break;
 				default:
@@ -156,6 +164,51 @@ public class OptionMenu {
 		}
 	}
 
+	//pt 2 making a new account, retirement
+	public void getRetirement(Account acc) {
+		boolean end = false;
+		while (!end) {
+			try {
+				System.out.println("\nRetirement Account: ");
+				System.out.println(" Type 1 - View Balance");
+				System.out.println(" Type 2 - Withdraw Funds");
+				System.out.println(" Type 3 - Deposit Funds");
+				System.out.println(" Type 4 - Transfer Funds");
+				System.out.println(" Type 5 - Exit");
+				System.out.print("\nChoice: ");
+
+				int selection = menuInput.nextInt();
+
+				switch (selection) {
+					case 1:
+						System.out.println("\nChecking Account Balance: " + moneyFormat.format(acc.getCheckingBalance()));
+						break;
+					case 2:
+						acc.getCheckingWithdrawInput();
+						break;
+					case 3:
+						acc.getCheckingDepositInput();
+						break;
+
+					case 4:
+						acc.getTransferInput("Checking");
+						break;
+					case 5:
+						end = true;
+						break;
+					default:
+						System.out.println("\nInvalid Choice.");
+				}
+			} catch (InputMismatchException e) {
+				System.out.println("\nInvalid Choice.");
+				menuInput.next();
+			}
+		}
+	}
+
+
+
+
 	public void createAccount() throws IOException {
 		int cst_no = 0;
 		boolean end = false;
@@ -187,8 +240,8 @@ public class OptionMenu {
 	}
 
 	public void mainMenu() throws IOException {
-		data.put(952141, new Account(952141, 191904, 1000, 5000));
-		data.put(123, new Account(123, 123, 20000, 50000));
+		data.put(952141, new Account(952141, 191904, 1000, 5000, 10000));
+		data.put(123, new Account(123, 123, 20000, 50000, 10000));
 		boolean end = false;
 		while (!end) {
 			try {
@@ -217,4 +270,7 @@ public class OptionMenu {
 		menuInput.close();
 		System.exit(0);
 	}
+
+
+
 }
